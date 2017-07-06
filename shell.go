@@ -686,7 +686,7 @@ func (s *Shell) BlockPutR(r io.Reader) (string, error) {
 
 func (s *Shell) BlockPut(block []byte) (string, error) {
 	r := bytes.NewReader(block)
-	s.BlockPutR(r)
+	return s.BlockPutR(r)
 }
 
 type IpfsObject struct {
