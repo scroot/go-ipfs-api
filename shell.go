@@ -631,9 +631,32 @@ func (s *Shell) BlockGet(path string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Output)
 }
 
-func (s *Shell) BlockPut(block []byte) (string, error) {
-	data := bytes.NewReader(block)
-	rc := ioutil.NopCloser(data)
+func (s *Shell) BlockRm(key string) (string, error){
+	req := s.newRequest(context.Background(), "block/rm", key)
+	req.Opts["force"] = "true"
+	
+	resp, err := req.Send(s.httpcli)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Close()
+	if resp.Error !=nil {
+		return "", resp.Error
+	}
+	
+	var out struct {
+		Hash,Error string
+	}
+	err = json.NewDecoder(resp.Output).Decode(&out)
+	if err != nil {
+		return "", err
+	}
+
+	return out.Hash, errors.New(out.Error)
+}
+
+func (s *Shell) BlockPutR(r io.Reader) (string, error) {
+	rc := ioutil.NopCloser(r)
 	fr := files.NewReaderFile("", "", rc, nil)
 	slf := files.NewSliceFile("", "", []files.File{fr})
 	fileReader := files.NewMultiFileReader(slf, true)
@@ -659,6 +682,11 @@ func (s *Shell) BlockPut(block []byte) (string, error) {
 	}
 
 	return out.Key, nil
+}
+
+func (s *Shell) BlockPut(block []byte) (string, error) {
+	r := bytes.NewReader(block)
+	s.BlockPutR(r)
 }
 
 type IpfsObject struct {
