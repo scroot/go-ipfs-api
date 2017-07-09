@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 	"strings"
 
 	files "github.com/whyrusleeping/go-multipart-files"
@@ -73,11 +74,19 @@ func (e *Error) Error() string {
 }
 
 func (r *Request) Send(c *http.Client) (*Response, error) {
+	return r.SendWithTimeout(c, 0)
+}
+
+func (r *Request) SendWithTimeout(c *http.Client, timeout time.Duration) (*Response, error) {
 	url := r.getURL()
 
 	req, err := http.NewRequest("POST", url, r.Body)
 	if err != nil {
 		return nil, err
+	}
+	
+	if timeout != 0 {
+		req.Timeout = timeout
 	}
 
 	if fr, ok := r.Body.(*files.MultiFileReader); ok {
