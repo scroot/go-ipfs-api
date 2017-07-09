@@ -617,19 +617,6 @@ func (s *Shell) BlockStat(path string) (string, int, error) {
 	return inf.Key, inf.Size, nil
 }
 
-func (s *Shell) BlockGetWithTimeout(path string, timeout time.Duration) ([]byte, error) {
-	resp, err := s.newRequest(context.Background(), "block/get", path).SendWithTimeout(s.httpcli, timeout)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Close()
-
-	if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return ioutil.ReadAll(resp.Output)
-}
 
 func (s *Shell) BlockGet(path string) ([]byte, error) {
 	resp, err := s.newRequest(context.Background(), "block/get", path).Send(s.httpcli)
