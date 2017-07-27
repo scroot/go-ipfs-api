@@ -78,6 +78,5 @@ func (s *PubSubSubscription) Cancel() error {
 	if s.resp.Output == nil {
 		return nil
 	}
-	return s.resp.Close()
-	//return s.resp.Output.Close()
+	return s.resp.Output.Close()
 }
